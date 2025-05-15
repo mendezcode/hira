@@ -511,6 +511,43 @@
             startButton.disabled = false;
         }
 
+        // Store the Kyoko voice globally
+        let kyoko;
+
+        // Function to load voices and find Kyoko
+        function loadVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            kyoko = voices.find(voice => voice.name === 'Kyoko');
+            
+            // For debugging if you can't find Kyoko
+            if (!kyoko) {
+                console.log('Available voices:', voices);
+            }
+        }
+
+        // Set up voice loading
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        // Initial load (needed for some browsers)
+        loadVoices();
+
+        function speakJapanese(str) {
+            // Cancel any current speech
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(str);
+            utterance.lang = 'ja-JP';
+            
+            // Use Kyoko if available, otherwise use default
+            if (kyoko) {
+                utterance.voice = kyoko;
+            }
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
         function showLearningScreen() {
             const selectedCols = getSelectedColumns();
             if (selectedCols.length === 0) {
@@ -565,6 +602,10 @@
         });
 
         romajiInputEl.addEventListener('keypress', (event) => {
+            if (event.key === ' ') {
+                speakJapanese(currentWordHiragana);
+                event.preventDefault();
+            }
             if (event.key === 'Enter') {
                 event.preventDefault(); // Prevent form submission if it were in a form
                 if (romajiInputEl.value.trim() === '') {
