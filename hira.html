@@ -1,652 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiragana Learner</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; /* Align to top for table visibility */
-            min-height: 100vh;
-            margin: 20px 0;
-            background-color: #f4f7f6;
-            color: #333;
-            font-size: 16px; /* Base font size */
-            margin: 0;
-            padding: 0;
-        }
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Hiragana Learner</title>
+	<style>
+		body {
+			font-family: 'Helvetica Neue', Arial, sans-serif;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: flex-start;
+			/* Align to top for table visibility */
+			min-height: 100vh;
+			margin: 20px 0;
+			background-color: #f4f7f6;
+			color: #333;
+			font-size: 16px;
+			/* Base font size */
+			margin: 0;
+			padding: 0;
+		}
 
-        .container {
-            background-color: #fff;
-            padding: 25px 45px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 800px; /* Max width for better readability on large screens */
-            margin-top: 2em;
-        }
+		.container {
+			background-color: #fff;
+			padding: 25px 45px;
+			border-radius: 12px;
+			box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+			text-align: center;
+			width: 90%;
+			max-width: 800px;
+			/* Max width for better readability on large screens */
+			margin-top: 2em;
+		}
 
-        h1, h2 {
-            color: #2c3e50;
-        }
-        h1 { margin-bottom: 15px; margin-top: 0; }
-        h2 { margin-bottom: 25px; font-size: 1.8em; }
+		h1,
+		h2 {
+			color: #2c3e50;
+		}
 
-        #scoreScreen {
-            padding: 2em 0 1.75em;
-        }
+		h1 {
+			margin-bottom: 15px;
+			margin-top: 0;
+		}
 
-        #selectionScreen, #learningScreen, #scoreScreen {
-            display: none; /* Hidden by default */
-        }
+		h2 {
+			margin-bottom: 25px;
+			font-size: 1.8em;
+		}
 
-        #selectionScreen.active, #learningScreen.active, #scoreScreen.active {
-            display: block;
-        }
+		#scoreScreen {
+			padding: 2em 0 1.75em;
+		}
 
-        /* Column Selection Table Styling */
-        #columnSelectionTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            font-size: 0.95em;
-        }
+		#selectionScreen,
+		#learningScreen,
+		#scoreScreen {
+			display: none;
+			/* Hidden by default */
+		}
 
-        #columnSelectionTable th, #columnSelectionTable td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-            vertical-align: middle;
-        }
+		#selectionScreen.active,
+		#learningScreen.active,
+		#scoreScreen.active {
+			display: block;
+		}
 
-        #columnSelectionTable th {
-            background-color: #e9ecef;
-            font-weight: bold;
-            font-size: 1em;
-        }
-        #columnSelectionTable td.label-cell {
-            font-weight: bold;
-            background-color: #f8f9fa;
-            text-align: left;
-            padding-left: 15px;
-        }
+		/* Column Selection Table Styling */
+		#columnSelectionTable {
+			width: 100%;
+			border-collapse: collapse;
+			margin-bottom: 20px;
+			font-size: 0.95em;
+		}
 
-        #columnSelectionTable .hiragana-char-cell {
-            font-size: 1.6em; /* Larger Hiragana in table */
-            color: #3498db;
-        }
+		#columnSelectionTable th,
+		#columnSelectionTable td {
+			border: 1px solid #ddd;
+			padding: 10px;
+			text-align: center;
+			vertical-align: middle;
+		}
 
-        #columnSelectionTable .romaji-char-cell {
-            font-style: italic;
-            color: #555;
-        }
+		#columnSelectionTable th {
+			background-color: #e9ecef;
+			font-weight: bold;
+			font-size: 1em;
+		}
 
-        #columnSelectionTable input[type="checkbox"] {
-            transform: scale(1.3);
-            cursor: pointer;
-        }
-        .check-all-container {
-            margin-bottom: 20px;
-            text-align: left;
-            padding-left: 5px;
-        }
-        .check-all-container label {
-            font-size: 1.1em;
-            font-weight: bold;
-        }
-         .check-all-container input[type="checkbox"] {
-            margin-right: 8px;
-            transform: scale(1.2);
-        }
+		#columnSelectionTable td.label-cell {
+			font-weight: bold;
+			background-color: #f8f9fa;
+			text-align: left;
+			padding-left: 15px;
+		}
 
+		#columnSelectionTable .hiragana-char-cell {
+			font-size: 1.6em;
+			/* Larger Hiragana in table */
+			color: #3498db;
+		}
 
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 1.05em;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.25s ease, transform 0.1s ease;
-            margin: 10px 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+		#columnSelectionTable .romaji-char-cell {
+			font-style: italic;
+			color: #555;
+		}
 
-        button:hover {
-            background-color: #2980b9;
-            transform: translateY(-1px);
-        }
-        button:active {
-            transform: translateY(0px);
-        }
+		#columnSelectionTable input[type="checkbox"] {
+			transform: scale(1.3);
+			cursor: pointer;
+		}
 
-        button:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-            transform: translateY(0px);
-            box-shadow: none;
-        }
+		.check-all-container {
+			margin-bottom: 20px;
+			text-align: left;
+			padding-left: 5px;
+		}
 
-        #hiraganaWord {
-            font-size: 5em; /* Maintained large font size */
-            color: #2c3e50;
-            margin: 25px 0;
-            min-height: 90px;
-            letter-spacing: 3px;
-            font-weight: bold;
-        }
+		.check-all-container label {
+			font-size: 1.1em;
+			font-weight: bold;
+		}
 
-        #hiraganaWord.incorrect {
-            color: #e74c3c; /* More distinct red for incorrect */
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-        }
+		.check-all-container input[type="checkbox"] {
+			margin-right: 8px;
+			transform: scale(1.2);
+		}
 
 
-        #romajiInput {
-            padding: 12px 15px;
-            font-size: 1.3em;
-            width: 85%;
-            max-width: 350px;
-            margin-bottom: 20px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            text-align: center;
-            transition: border-color 0.3s ease;
-        }
-        #romajiInput:focus {
-            border-color: #3498db;
-            outline: none;
-        }
+		button {
+			background-color: #3498db;
+			color: white;
+			border: none;
+			padding: 14px 28px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: 1.05em;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: background-color 0.25s ease, transform 0.1s ease;
+			margin: 10px 5px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		button:hover {
+			background-color: #2980b9;
+			transform: translateY(-1px);
+		}
+
+		button:active {
+			transform: translateY(0px);
+		}
+
+		button:disabled {
+			background-color: #bdc3c7;
+			cursor: not-allowed;
+			transform: translateY(0px);
+			box-shadow: none;
+		}
+
+		#hiraganaWord {
+			font-size: 5em;
+			/* Maintained large font size */
+			color: #2c3e50;
+			margin: 25px 0;
+			min-height: 90px;
+			letter-spacing: 3px;
+			font-weight: bold;
+		}
+
+		#hiraganaWord.incorrect {
+			color: #e74c3c;
+			/* More distinct red for incorrect */
+			animation: shake 0.5s;
+		}
+
+		@keyframes shake {
+
+			0%,
+			100% {
+				transform: translateX(0);
+			}
+
+			25% {
+				transform: translateX(-5px);
+			}
+
+			50% {
+				transform: translateX(5px);
+			}
+
+			75% {
+				transform: translateX(-5px);
+			}
+		}
 
 
-        #feedback {
-            min-height: 24px;
-            margin-bottom: 18px;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
+		#romajiInput {
+			padding: 12px 15px;
+			font-size: 1.3em;
+			width: 85%;
+			max-width: 350px;
+			margin-bottom: 20px;
+			border: 2px solid #bdc3c7;
+			border-radius: 6px;
+			text-align: center;
+			transition: border-color 0.3s ease;
+		}
 
-        #progressText {
-            font-size: 1em;
-            color: #7f8c8d;
-            margin-bottom: 25px;
-        }
+		#romajiInput:focus {
+			border-color: #3498db;
+			outline: none;
+		}
 
-        .score-summary {
-            font-size: 1.7em;
-            margin-bottom: 25px;
-            color: #2c3e50;
-        }
-    </style>
+
+		#feedback {
+			min-height: 24px;
+			margin-bottom: 18px;
+			font-weight: bold;
+			font-size: 1.1em;
+		}
+
+		#progressText {
+			font-size: 1em;
+			color: #7f8c8d;
+			margin-bottom: 25px;
+		}
+
+		.score-summary {
+			font-size: 1.7em;
+			margin-bottom: 25px;
+			color: #2c3e50;
+		}
+	</style>
 </head>
+
 <body>
 
-    <div class="container">
-        <div id="selectionScreen" class="active">
-            <h1>Learn Hiragana</h1>
-            <!-- <h2>Choose Columns to Practice</h2> -->
-            <div class="check-all-container">
-                <label><input type="checkbox" id="checkAllColumns"> Check / Uncheck All</label>
-            </div>
-            <table id="columnSelectionTable">
-                <thead>
-                    <tr>
-                        <th>Group</th>
-                        </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
-            <button id="startButton">Start Learning</button>
-        </div>
+	<div class="container">
+		<div id="selectionScreen" class="active">
+			<h1>Learn Hiragana</h1>
+			<!-- <h2>Choose Columns to Practice</h2> -->
+			<div class="check-all-container">
+				<label><input type="checkbox" id="checkAllColumns"> Check / Uncheck All</label>
+			</div>
+			<table id="columnSelectionTable">
+				<thead>
+					<tr>
+						<th>Group</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+			<button id="startButton">Start Learning</button>
+		</div>
 
-        <div id="learningScreen">
-            <h2>Translate the Hiragana</h2>
-            <div id="hiraganaWord"></div>
-            <input type="text" id="romajiInput" placeholder="Type romaji here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <div id="feedback"></div>
-            <div id="progressText">Word 1 of 25</div>
-            </div>
+		<div id="learningScreen">
+			<h2>Translate the Hiragana</h2>
+			<div id="hiraganaWord"></div>
+			<input type="text" id="romajiInput" placeholder="Type romaji here" autocomplete="off" autocorrect="off"
+				autocapitalize="off" spellcheck="false">
+			<div id="feedback"></div>
+			<div id="progressText">Word 1 of 25</div>
+		</div>
 
-        <div id="scoreScreen">
-            <h2 style="margin-top: 0;">Quiz Finished!</h2>
-            <div class="score-summary" id="scoreText"></div>
-            <button id="continueButton">Continue (Same Columns)</button>
-            <button id="chooseNewButton">Choose New Columns</button>
-        </div>
-    </div>
+		<div id="scoreScreen">
+			<h2 style="margin-top: 0;">Quiz Finished!</h2>
+			<div class="score-summary" id="scoreText"></div>
+			<button id="continueButton">Continue (Same Columns)</button>
+			<button id="chooseNewButton">Choose New Columns</button>
+		</div>
+	</div>
 
-    <script>
-        const hiraganaMasterList = {
-            'a': [{ h: 'あ', r: 'a' }, { h: 'い', r: 'i' }, { h: 'う', r: 'u' }, { h: 'え', r: 'e' }, { h: 'お', r: 'o' }],
-            'ka': [{ h: 'か', r: 'ka' }, { h: 'き', r: 'ki' }, { h: 'く', r: 'ku' }, { h: 'け', r: 'ke' }, { h: 'こ', r: 'ko' }],
-            'sa': [{ h: 'さ', r: 'sa' }, { h: 'し', r: 'shi' }, { h: 'す', r: 'su' }, { h: 'せ', r: 'se' }, { h: 'そ', r: 'so' }],
-            'ta': [{ h: 'た', r: 'ta' }, { h: 'ち', r: 'chi' }, { h: 'つ', r: 'tsu' }, { h: 'て', r: 'te' }, { h: 'と', r: 'to' }],
-            'na': [{ h: 'な', r: 'na' }, { h: 'に', r: 'ni' }, { h: 'ぬ', r: 'nu' }, { h: 'ね', r: 'ne' }, { h: 'の', r: 'no' }],
-            'ha': [{ h: 'は', r: 'ha' }, { h: 'ひ', r: 'hi' }, { h: 'ふ', r: 'fu' }, { h: 'へ', r: 'he' }, { h: 'ほ', r: 'ho' }],
-            'ma': [{ h: 'ま', r: 'ma' }, { h: 'み', r: 'mi' }, { h: 'む', r: 'mu' }, { h: 'め', r: 'me' }, { h: 'も', r: 'mo' }],
-            'ya': [{ h: 'や', r: 'ya' }, { h: 'ゆ', r: 'yu' }, { h: 'よ', r: 'yo' }],
-            'ra': [{ h: 'ら', r: 'ra' }, { h: 'り', r: 'ri' }, { h: 'る', r: 'ru' }, { h: 'れ', r: 're' }, { h: 'ろ', r: 'ro' }],
-            'wa': [{ h: 'わ', r: 'wa' }, { h: 'を', r: 'wo' }],
-            'n_solo': [{h: 'ん', r: 'n'}], // 'n' column
-            'ga': [{ h: 'が', r: 'ga' }, { h: 'ぎ', r: 'gi' }, { h: 'ぐ', r: 'gu' }, { h: 'げ', r: 'ge' }, { h: 'ご', r: 'go' }],
-            'za': [{ h: 'ざ', r: 'za' }, { h: 'じ', r: 'ji' }, { h: 'ず', r: 'zu' }, { h: 'ぜ', r: 'ze' }, { h: 'ぞ', r: 'zo' }],
-            'da': [{ h: 'だ', r: 'da' }, { h: 'ぢ', r: 'ji' }, { h: 'づ', r: 'dzu' }, { h: 'で', r: 'de' }, { h: 'ど', r: 'do' }], // Note: ぢ/ji, づ/dzu often romanized as ji/zu
-            'ba': [{ h: 'ば', r: 'ba' }, { h: 'び', r: 'bi' }, { h: 'ぶ', r: 'bu' }, { h: 'べ', r: 'be' }, { h: 'ぼ', r: 'bo' }],
-            'pa': [{ h: 'ぱ', r: 'pa' }, { h: 'ぴ', r: 'pi' }, { h: 'ぷ', r: 'pu' }, { h: 'ぺ', r: 'pe' }, { h: 'ぽ', r: 'po' }]
-        };
-        // Order of columns for the table
-        const columnOrder = ['a', 'ka', 'sa', 'ta', 'na', 'ha', 'ma', 'ya', 'ra', 'wa', 'n_solo', 'ga', 'za', 'da', 'ba', 'pa'];
+	<script>
+		const hiraganaMasterList = {
+			'a': [{ h: 'あ', r: 'a' }, { h: 'い', r: 'i' }, { h: 'う', r: 'u' }, { h: 'え', r: 'e' }, { h: 'お', r: 'o' }],
+			'ka': [{ h: 'か', r: 'ka' }, { h: 'き', r: 'ki' }, { h: 'く', r: 'ku' }, { h: 'け', r: 'ke' }, { h: 'こ', r: 'ko' }],
+			'sa': [{ h: 'さ', r: 'sa' }, { h: 'し', r: 'shi' }, { h: 'す', r: 'su' }, { h: 'せ', r: 'se' }, { h: 'そ', r: 'so' }],
+			'ta': [{ h: 'た', r: 'ta' }, { h: 'ち', r: 'chi' }, { h: 'つ', r: 'tsu' }, { h: 'て', r: 'te' }, { h: 'と', r: 'to' }],
+			'na': [{ h: 'な', r: 'na' }, { h: 'に', r: 'ni' }, { h: 'ぬ', r: 'nu' }, { h: 'ね', r: 'ne' }, { h: 'の', r: 'no' }],
+			'ha': [{ h: 'は', r: 'ha' }, { h: 'ひ', r: 'hi' }, { h: 'ふ', r: 'fu' }, { h: 'へ', r: 'he' }, { h: 'ほ', r: 'ho' }],
+			'ma': [{ h: 'ま', r: 'ma' }, { h: 'み', r: 'mi' }, { h: 'む', r: 'mu' }, { h: 'め', r: 'me' }, { h: 'も', r: 'mo' }],
+			'ya': [{ h: 'や', r: 'ya' }, { h: 'ゆ', r: 'yu' }, { h: 'よ', r: 'yo' }],
+			'ra': [{ h: 'ら', r: 'ra' }, { h: 'り', r: 'ri' }, { h: 'る', r: 'ru' }, { h: 'れ', r: 're' }, { h: 'ろ', r: 'ro' }],
+			'wa': [{ h: 'わ', r: 'wa' }, { h: 'を', r: 'wo' }],
+			'n_solo': [{ h: 'ん', r: 'n' }], // 'n' column
+			'ga': [{ h: 'が', r: 'ga' }, { h: 'ぎ', r: 'gi' }, { h: 'ぐ', r: 'gu' }, { h: 'げ', r: 'ge' }, { h: 'ご', r: 'go' }],
+			'za': [{ h: 'ざ', r: 'za' }, { h: 'じ', r: 'ji' }, { h: 'ず', r: 'zu' }, { h: 'ぜ', r: 'ze' }, { h: 'ぞ', r: 'zo' }],
+			'da': [{ h: 'だ', r: 'da' }, { h: 'ぢ', r: 'ji' }, { h: 'づ', r: 'dzu' }, { h: 'で', r: 'de' }, { h: 'ど', r: 'do' }], // Note: ぢ/ji, づ/dzu often romanized as ji/zu
+			'ba': [{ h: 'ば', r: 'ba' }, { h: 'び', r: 'bi' }, { h: 'ぶ', r: 'bu' }, { h: 'べ', r: 'be' }, { h: 'ぼ', r: 'bo' }],
+			'pa': [{ h: 'ぱ', r: 'pa' }, { h: 'ぴ', r: 'pi' }, { h: 'ぷ', r: 'pu' }, { h: 'ぺ', r: 'pe' }, { h: 'ぽ', r: 'po' }]
+		};
+		// Order of columns for the table
+		const columnOrder = ['a', 'ka', 'sa', 'ta', 'na', 'ha', 'ma', 'ya', 'ra', 'wa', 'n_solo', 'ga', 'za', 'da', 'ba', 'pa'];
 
-        const selectionScreen = document.getElementById('selectionScreen');
-        const learningScreen = document.getElementById('learningScreen');
-        const scoreScreen = document.getElementById('scoreScreen');
+		const selectionScreen = document.getElementById('selectionScreen');
+		const learningScreen = document.getElementById('learningScreen');
+		const scoreScreen = document.getElementById('scoreScreen');
 
-        const startButton = document.getElementById('startButton');
-        const hiraganaWordEl = document.getElementById('hiraganaWord');
-        const romajiInputEl = document.getElementById('romajiInput');
-        const feedbackEl = document.getElementById('feedback');
-        const progressTextEl = document.getElementById('progressText');
+		const startButton = document.getElementById('startButton');
+		const hiraganaWordEl = document.getElementById('hiraganaWord');
+		const romajiInputEl = document.getElementById('romajiInput');
+		const feedbackEl = document.getElementById('feedback');
+		const progressTextEl = document.getElementById('progressText');
 
-        const scoreTextEl = document.getElementById('scoreText');
-        const continueButton = document.getElementById('continueButton');
-        const chooseNewButton = document.getElementById('chooseNewButton');
-        const columnSelectionTable = document.getElementById('columnSelectionTable');
-        const checkAllColumnsCheckbox = document.getElementById('checkAllColumns');
-
-
-        let selectedCharacters = [];
-        let currentWordHiragana = '';
-        let currentWordRomaji = '';
-        let currentWordRomajiSplit = [];
-        let score = 0;
-        let wordsAttempted = 0;
-        const totalWordsPerRound = 20;
-        let inputTimeout = null; // For handling incorrect input feedback
-
-        function buildColumnSelectionTable() {
-            const tableHead = columnSelectionTable.querySelector('thead tr');
-            const tableBody = columnSelectionTable.querySelector('tbody');
-            tableHead.innerHTML = '<th>Group</th>'; // Reset header
-            tableBody.innerHTML = ''; // Reset body
-
-            const maxCharsInCol = Math.max(...Object.values(hiraganaMasterList).map(arr => arr.length));
-
-            // Header row (Column names like A, KA, SA...)
-            columnOrder.forEach(colKey => {
-                const th = document.createElement('th');
-                th.textContent = colKey === 'n_solo' ? 'N' : colKey.toUpperCase();
-                tableHead.appendChild(th);
-            });
-
-            // Hiragana, Romaji, and Checkbox rows
-            const rowTypes = [
-                { label: 'Hiragana', key: 'h', cellClass: 'hiragana-char-cell' },
-                { label: 'Romaji', key: 'r', cellClass: 'romaji-char-cell' }
-            ];
-
-            for (let i = 0; i < maxCharsInCol; i++) {
-                rowTypes.forEach(type => {
-                    const tr = document.createElement('tr');
-                    const labelCell = document.createElement('td');
-                    labelCell.classList.add('label-cell');
-                    // Only add label for the first character of each type
-                    labelCell.textContent = i === 0 ? type.label : '';
-                    tr.appendChild(labelCell);
-
-                    columnOrder.forEach(colKey => {
-                        const td = document.createElement('td');
-                        const charsInCol = hiraganaMasterList[colKey];
-                        if (charsInCol && charsInCol[i]) {
-                            td.textContent = charsInCol[i][type.key];
-                            if (type.cellClass) td.classList.add(type.cellClass);
-                        } else {
-                            td.innerHTML = '&nbsp;'; // Empty cell if no char
-                        }
-                        tr.appendChild(td);
-                    });
-                    tableBody.appendChild(tr);
-                });
-            }
-
-            // Checkbox row
-            const checkboxTr = document.createElement('tr');
-            const checkboxLabelTd = document.createElement('td');
-            checkboxLabelTd.textContent = 'Select';
-            checkboxLabelTd.classList.add('label-cell');
-            checkboxTr.appendChild(checkboxLabelTd);
-
-            columnOrder.forEach(colKey => {
-                const td = document.createElement('td');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = colKey;
-                checkbox.classList.add('column-checkbox');
-                if (colKey === 'a') checkbox.checked = true; // Default 'a' column checked
-                td.appendChild(checkbox);
-                checkboxTr.appendChild(td);
-            });
-            tableBody.appendChild(checkboxTr);
-        }
+		const scoreTextEl = document.getElementById('scoreText');
+		const continueButton = document.getElementById('continueButton');
+		const chooseNewButton = document.getElementById('chooseNewButton');
+		const columnSelectionTable = document.getElementById('columnSelectionTable');
+		const checkAllColumnsCheckbox = document.getElementById('checkAllColumns');
 
 
-        function getSelectedColumns() {
-            const checkboxes = document.querySelectorAll('#columnSelectionTable .column-checkbox:checked');
-            const columns = [];
-            checkboxes.forEach(cb => columns.push(cb.value));
-            return columns;
-        }
+		let selectedCharacters = [];
+		let currentWordHiragana = '';
+		let currentWordRomaji = '';
+		let currentWordRomajiSplit = [];
+		let score = 0;
+		let wordsAttempted = 0;
+		const totalWordsPerRound = 20;
+		let inputTimeout = null; // For handling incorrect input feedback
 
-        function populateSelectedCharacters(columns) {
-            selectedCharacters = [];
-            columns.forEach(colKey => {
-                if (hiraganaMasterList[colKey]) {
-                    selectedCharacters.push(...hiraganaMasterList[colKey]);
-                }
-            });
-        }
+		function buildColumnSelectionTable() {
+			const tableHead = columnSelectionTable.querySelector('thead tr');
+			const tableBody = columnSelectionTable.querySelector('tbody');
+			tableHead.innerHTML = '<th>Group</th>'; // Reset header
+			tableBody.innerHTML = ''; // Reset body
 
-        function generateRandomWord() {
-            // Ensure selectedCharacters is defined and accessible in this scope.
-            // Ensure hiraganaWordEl, feedbackEl, romajiInputEl, currentWordHiragana, currentWordRomaji
-            // are also defined and accessible.
+			const maxCharsInCol = Math.max(...Object.values(hiraganaMasterList).map(arr => arr.length));
 
-            if (selectedCharacters.length === 0) {
-                hiraganaWordEl.textContent = 'Error!';
-                feedbackEl.textContent = 'Please select character sets.';
-                romajiInputEl.disabled = true;
-                return;
-            }
-            romajiInputEl.disabled = false;
+			// Header row (Column names like A, KA, SA...)
+			columnOrder.forEach(colKey => {
+				const th = document.createElement('th');
+				th.textContent = colKey === 'n_solo' ? 'N' : colKey.toUpperCase();
+				tableHead.appendChild(th);
+			});
 
-            // Determine word length, but don't exceed the number of unique characters available
-            const maxPossibleLength = Math.min(selectedCharacters.length, 6); // Max of 6 or available chars
-            let wordLength = Math.floor(Math.random() * (maxPossibleLength - 2)) + 3; // 3 to maxPossibleLength chars
-            
-            // If we don't have enough unique characters for the minimum length, adjust
-            wordLength = Math.min(wordLength, selectedCharacters.length);
-            if (wordLength < 3) {
-                wordLength = Math.min(3, selectedCharacters.length);
-            }
+			// Hiragana, Romaji, and Checkbox rows
+			const rowTypes = [
+				{ label: 'Hiragana', key: 'h', cellClass: 'hiragana-char-cell' },
+				{ label: 'Romaji', key: 'r', cellClass: 'romaji-char-cell' }
+			];
 
-            let hWord = '';
-            let rWord = '';
-            let rSplit = [];
-            
-            // Create a copy of selectedCharacters that we can modify
-            let availableCharacters = [...selectedCharacters];
-            
-            // Filter out 'ん' if it's the first character of a multi-character word
-            if (wordLength > 1) {
-                availableCharacters = availableCharacters.filter(char => char.h !== 'ん');
-                // If this filtering leaves us with no characters, fall back to original set
-                if (availableCharacters.length === 0) {
-                    availableCharacters = [...selectedCharacters];
-                }
-            }
+			for (let i = 0; i < maxCharsInCol; i++) {
+				rowTypes.forEach(type => {
+					const tr = document.createElement('tr');
+					const labelCell = document.createElement('td');
+					labelCell.classList.add('label-cell');
+					// Only add label for the first character of each type
+					labelCell.textContent = i === 0 ? type.label : '';
+					tr.appendChild(labelCell);
 
-            // Shuffle the available characters to ensure randomness
-            availableCharacters = shuffleArray(availableCharacters);
-            
-            // Take the first 'wordLength' characters from the shuffled array
-            const selectedChars = availableCharacters.slice(0, wordLength);
-            
-            // Build the word from the selected unique characters
-            for (const char of selectedChars) {
-                hWord += char.h;
-                rWord += char.r;
-                rSplit.push(char.r.toLowerCase());
-            }
+					columnOrder.forEach(colKey => {
+						const td = document.createElement('td');
+						const charsInCol = hiraganaMasterList[colKey];
+						if (charsInCol && charsInCol[i]) {
+							td.textContent = charsInCol[i][type.key];
+							if (type.cellClass) td.classList.add(type.cellClass);
+						} else {
+							td.innerHTML = '&nbsp;'; // Empty cell if no char
+						}
+						tr.appendChild(td);
+					});
+					tableBody.appendChild(tr);
+				});
+			}
 
-            currentWordHiragana = hWord;
-            currentWordRomaji = rWord.toLowerCase();
-            currentWordRomajiSplit = [...rSplit];
-            hiraganaWordEl.textContent = currentWordHiragana;
-            hiraganaWordEl.classList.remove('incorrect');
-            feedbackEl.textContent = '';
-        }
+			// Checkbox row
+			const checkboxTr = document.createElement('tr');
+			const checkboxLabelTd = document.createElement('td');
+			checkboxLabelTd.textContent = 'Select';
+			checkboxLabelTd.classList.add('label-cell');
+			checkboxTr.appendChild(checkboxLabelTd);
 
-        // Helper function to shuffle an array (Fisher-Yates algorithm)
-        function shuffleArray(array) {
-            const newArray = [...array];
-            for (let i = newArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-            }
-            return newArray;
-        }
-
-        function processCorrectAnswer() {
-            score++;
-            wordsAttempted++;
-            feedbackEl.textContent = 'Correct!';
-            feedbackEl.style.color = 'green';
-            romajiInputEl.value = ''; // Clear input
-            hiraganaWordEl.classList.remove('incorrect');
-
-            // Brief pause before next word
-            setTimeout(() => {
-                if (wordsAttempted >= totalWordsPerRound) {
-                    showScoreScreen();
-                } else {
-                    updateProgress();
-                    generateRandomWord();
-                }
-                feedbackEl.textContent = ''; // Clear feedback for next word
-            }, 300); // 300ms delay
-        }
-
-        function handleIncorrectInput() {
-            hiraganaWordEl.classList.add('incorrect');
-            feedbackEl.textContent = 'Incorrect...';
-            feedbackEl.style.color = '#e74c3c';
-
-            // Clear the incorrect feedback after a short delay if user doesn't correct it
-            clearTimeout(inputTimeout);
-            inputTimeout = setTimeout(() => {
-                if (hiraganaWordEl.classList.contains('incorrect')) {
-                    // Only clear if it's still marked incorrect (user hasn't typed more)
-                    hiraganaWordEl.classList.remove('incorrect');
-                    feedbackEl.textContent = '';
-                }
-            }, 1500);
-        }
-
-        const placeholderText = romajiInput.getAttribute('placeholder');
-
-        function handleSkipped(e) {
-            if ('Enter' === e.key) {
-                if (wordsAttempted >= totalWordsPerRound) {
-                    showScoreScreen();
-                } else {
-                    updateProgress();
-                    generateRandomWord();
-                }
-                document.body.removeEventListener('keypress', handleSkipped);
-                romajiInput.setAttribute('placeholder', placeholderText);
-                feedbackEl.textContent = '';
-                romajiInput.disabled = false;
-                romajiInput.focus();
-            }
-        }
-
-        function skipWord() {
-            wordsAttempted++;
-            feedbackEl.textContent = `${currentWordRomajiSplit.join(' · ')}`;
-            feedbackEl.style.color = '#f39c12'; // Orange for skipped
-            romajiInputEl.value = '';
-            romajiInput.setAttribute('placeholder', 'Skipped!');
-            hiraganaWordEl.classList.remove('incorrect');
-            romajiInput.disabled = true;
-            setTimeout(() => {
-                document.body.addEventListener('keypress', handleSkipped);
-            }, 0 );
-        }
+			columnOrder.forEach(colKey => {
+				const td = document.createElement('td');
+				const checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.value = colKey;
+				checkbox.classList.add('column-checkbox');
+				if (colKey === 'a') checkbox.checked = true; // Default 'a' column checked
+				td.appendChild(checkbox);
+				checkboxTr.appendChild(td);
+			});
+			tableBody.appendChild(checkboxTr);
+		}
 
 
-        function updateProgress() {
-            progressTextEl.textContent = `Word ${wordsAttempted + 1} of ${totalWordsPerRound}`;
-        }
+		function getSelectedColumns() {
+			const checkboxes = document.querySelectorAll('#columnSelectionTable .column-checkbox:checked');
+			const columns = [];
+			checkboxes.forEach(cb => columns.push(cb.value));
+			return columns;
+		}
 
-        function showSelectionScreen() {
-            selectionScreen.classList.add('active');
-            learningScreen.classList.remove('active');
-            scoreScreen.classList.remove('active');
-            startButton.disabled = false;
-        }
+		function populateSelectedCharacters(columns) {
+			selectedCharacters = [];
+			columns.forEach(colKey => {
+				if (hiraganaMasterList[colKey]) {
+					selectedCharacters.push(...hiraganaMasterList[colKey]);
+				}
+			});
+		}
 
-        // Store the Kyoko voice globally
-        let kyoko;
+		function generateRandomWord() {
+			// Ensure selectedCharacters is defined and accessible in this scope.
+			// Ensure hiraganaWordEl, feedbackEl, romajiInputEl, currentWordHiragana, currentWordRomaji
+			// are also defined and accessible.
 
-        // Function to load voices and find Kyoko
-        function loadVoices() {
-            const voices = window.speechSynthesis.getVoices();
-            kyoko = voices.find(voice => voice.name === 'Kyoko');
-            
-            // For debugging if you can't find Kyoko
-            if (!kyoko) {
-                console.log('Available voices:', voices);
-            }
-        }
+			if (selectedCharacters.length === 0) {
+				hiraganaWordEl.textContent = 'Error!';
+				feedbackEl.textContent = 'Please select character sets.';
+				romajiInputEl.disabled = true;
+				return;
+			}
+			romajiInputEl.disabled = false;
 
-        // Set up voice loading
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-            window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
+			// Determine word length, but don't exceed the number of unique characters available
+			const maxPossibleLength = Math.min(selectedCharacters.length, 6); // Max of 6 or available chars
+			let wordLength = Math.floor(Math.random() * (maxPossibleLength - 2)) + 3; // 3 to maxPossibleLength chars
 
-        // Initial load (needed for some browsers)
-        loadVoices();
+			// If we don't have enough unique characters for the minimum length, adjust
+			wordLength = Math.min(wordLength, selectedCharacters.length);
+			if (wordLength < 3) {
+				wordLength = Math.min(3, selectedCharacters.length);
+			}
 
-        function speakJapanese(str) {
-            // Cancel any current speech
-            window.speechSynthesis.cancel();
-            
-            const utterance = new SpeechSynthesisUtterance(str);
-            utterance.lang = 'ja-JP';
-            
-            // Use Kyoko if available, otherwise use default
-            if (kyoko) {
-                utterance.voice = kyoko;
-            }
-            
-            window.speechSynthesis.speak(utterance);
-        }
+			let hWord = '';
+			let rWord = '';
+			let rSplit = [];
 
-        function showLearningScreen() {
-            const selectedCols = getSelectedColumns();
-            if (selectedCols.length === 0) {
-                alert("Please select at least one Hiragana column set to practice.");
-                return;
-            }
-            populateSelectedCharacters(selectedCols);
-            if (selectedCharacters.length === 0) {
-                 alert("No characters available for the selected columns.");
-                return;
-            }
+			// Create a copy of selectedCharacters that we can modify
+			let availableCharacters = [...selectedCharacters];
 
-            selectionScreen.classList.remove('active');
-            learningScreen.classList.add('active');
-            scoreScreen.classList.remove('active');
+			// Filter out 'ん' if it's the first character of a multi-character word
+			if (wordLength > 1) {
+				availableCharacters = availableCharacters.filter(char => char.h !== 'ん');
+				// If this filtering leaves us with no characters, fall back to original set
+				if (availableCharacters.length === 0) {
+					availableCharacters = [...selectedCharacters];
+				}
+			}
 
-            score = 0;
-            wordsAttempted = 0;
-            updateProgress();
-            generateRandomWord();
-            romajiInputEl.value = ''; // Clear input from previous session
-            romajiInputEl.focus();
-            startButton.disabled = true;
-        }
+			// Shuffle the available characters to ensure randomness
+			availableCharacters = shuffleArray(availableCharacters);
 
-        function showScoreScreen() {
-            learningScreen.classList.remove('active');
-            scoreScreen.classList.add('active');
-            scoreTextEl.textContent = `You scored ${score}/${totalWordsPerRound}`;
-            continueButton.focus();
-        }
+			// Take the first 'wordLength' characters from the shuffled array
+			const selectedChars = availableCharacters.slice(0, wordLength);
 
-        // Event Listeners
-        startButton.addEventListener('click', showLearningScreen);
+			// Build the word from the selected unique characters
+			for (const char of selectedChars) {
+				hWord += char.h;
+				rWord += char.r;
+				rSplit.push(char.r.toLowerCase());
+			}
 
-        romajiInputEl.addEventListener('input', () => {
-            const userAnswer = romajiInputEl.value.trim().toLowerCase();
-            clearTimeout(inputTimeout); // Clear any pending incorrect feedback timeout
+			currentWordHiragana = hWord;
+			currentWordRomaji = rWord.toLowerCase();
+			currentWordRomajiSplit = [...rSplit];
+			hiraganaWordEl.textContent = currentWordHiragana;
+			hiraganaWordEl.classList.remove('incorrect');
+			feedbackEl.textContent = '';
+		}
 
-            if (userAnswer === currentWordRomaji) {
-                processCorrectAnswer();
-            } else if (currentWordRomaji.startsWith(userAnswer)) {
-                // Partial match, clear incorrect styling if it was there
-                hiraganaWordEl.classList.remove('incorrect');
-                feedbackEl.textContent = ''; // Clear feedback
-            } else if (userAnswer.length > 0) { // If typed something and it's not a partial or full match
-                handleIncorrectInput();
-            } else { // Input is empty
-                hiraganaWordEl.classList.remove('incorrect');
-                feedbackEl.textContent = '';
-            }
-        });
+		// Helper function to shuffle an array (Fisher-Yates algorithm)
+		function shuffleArray(array) {
+			const newArray = [...array];
+			for (let i = newArray.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+			}
+			return newArray;
+		}
 
-        romajiInputEl.addEventListener('keypress', (event) => {
-            if (event.key === ' ') {
-                speakJapanese(currentWordHiragana);
-                event.preventDefault();
-            }
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent form submission if it were in a form
-                if (romajiInputEl.value.trim() === '') {
-                    skipWord();
-                } else {
-                    // If enter is pressed with content, check it (though 'input' usually handles it)
-                    const userAnswer = romajiInputEl.value.trim().toLowerCase();
-                    if (userAnswer === currentWordRomaji) {
-                        processCorrectAnswer();
-                    } else {
-                        handleIncorrectInput(); // Show incorrect if enter is pressed on wrong full answer
-                    }
-                }
-            }
-        });
+		function processCorrectAnswer() {
+			score++;
+			wordsAttempted++;
+			feedbackEl.textContent = 'Correct!';
+			feedbackEl.style.color = 'green';
+			romajiInputEl.value = ''; // Clear input
+			hiraganaWordEl.classList.remove('incorrect');
 
-        continueButton.addEventListener('click', () => {
-            scoreScreen.classList.remove('active');
-            learningScreen.classList.add('active');
-            score = 0;
-            wordsAttempted = 0;
-            updateProgress();
-            generateRandomWord();
-            romajiInputEl.value = '';
-            romajiInputEl.focus();
-        });
+			// Brief pause before next word
+			setTimeout(() => {
+				if (wordsAttempted >= totalWordsPerRound) {
+					showScoreScreen();
+				} else {
+					updateProgress();
+					generateRandomWord();
+				}
+				feedbackEl.textContent = ''; // Clear feedback for next word
+			}, 300); // 300ms delay
+		}
 
-        chooseNewButton.addEventListener('click', showSelectionScreen);
+		function handleIncorrectInput() {
+			hiraganaWordEl.classList.add('incorrect');
+			feedbackEl.textContent = 'Incorrect...';
+			feedbackEl.style.color = '#e74c3c';
 
-        checkAllColumnsCheckbox.addEventListener('change', (event) => {
-            const isChecked = event.target.checked;
-            document.querySelectorAll('#columnSelectionTable .column-checkbox').forEach(cb => {
-                cb.checked = isChecked;
-            });
-        });
+			// Clear the incorrect feedback after a short delay if user doesn't correct it
+			clearTimeout(inputTimeout);
+			inputTimeout = setTimeout(() => {
+				if (hiraganaWordEl.classList.contains('incorrect')) {
+					// Only clear if it's still marked incorrect (user hasn't typed more)
+					hiraganaWordEl.classList.remove('incorrect');
+					feedbackEl.textContent = '';
+				}
+			}, 1500);
+		}
+
+		const placeholderText = romajiInput.getAttribute('placeholder');
+
+		function handleSkipped(e) {
+			if ('Enter' === e.key) {
+				if (wordsAttempted >= totalWordsPerRound) {
+					showScoreScreen();
+				} else {
+					updateProgress();
+					generateRandomWord();
+				}
+				document.body.removeEventListener('keypress', handleSkipped);
+				romajiInput.setAttribute('placeholder', placeholderText);
+				feedbackEl.textContent = '';
+				romajiInput.disabled = false;
+				romajiInput.focus();
+			}
+		}
+
+		function skipWord() {
+			wordsAttempted++;
+			feedbackEl.textContent = `${currentWordRomajiSplit.join(' · ')}`;
+			feedbackEl.style.color = '#f39c12'; // Orange for skipped
+			romajiInputEl.value = '';
+			romajiInput.setAttribute('placeholder', 'Skipped!');
+			hiraganaWordEl.classList.remove('incorrect');
+			romajiInput.disabled = true;
+			setTimeout(() => {
+				document.body.addEventListener('keypress', handleSkipped);
+			}, 0);
+		}
 
 
-        // Initial setup
-        buildColumnSelectionTable(); // Build the table on load
-        showSelectionScreen(); // Start with the selection screen
+		function updateProgress() {
+			progressTextEl.textContent = `Word ${wordsAttempted + 1} of ${totalWordsPerRound}`;
+		}
 
-    </script>
+		function showSelectionScreen() {
+			selectionScreen.classList.add('active');
+			learningScreen.classList.remove('active');
+			scoreScreen.classList.remove('active');
+			startButton.disabled = false;
+		}
+
+		// Store the Kyoko voice globally
+		let kyoko;
+
+		// Function to load voices and find Kyoko
+		function loadVoices() {
+			const voices = window.speechSynthesis.getVoices();
+			kyoko = voices.find(voice => voice.name === 'Kyoko');
+
+			// For debugging if you can't find Kyoko
+			if (!kyoko) {
+				console.log('Available voices:', voices);
+			}
+		}
+
+		// Set up voice loading
+		if (window.speechSynthesis.onvoiceschanged !== undefined) {
+			window.speechSynthesis.onvoiceschanged = loadVoices;
+		}
+
+		// Initial load (needed for some browsers)
+		loadVoices();
+
+		function speakJapanese(str) {
+			// Cancel any current speech
+			window.speechSynthesis.cancel();
+
+			const utterance = new SpeechSynthesisUtterance(str);
+			utterance.lang = 'ja-JP';
+
+			// Use Kyoko if available, otherwise use default
+			if (kyoko) {
+				utterance.voice = kyoko;
+			}
+
+			window.speechSynthesis.speak(utterance);
+		}
+
+		function showLearningScreen() {
+			const selectedCols = getSelectedColumns();
+			if (selectedCols.length === 0) {
+				alert("Please select at least one Hiragana column set to practice.");
+				return;
+			}
+			populateSelectedCharacters(selectedCols);
+			if (selectedCharacters.length === 0) {
+				alert("No characters available for the selected columns.");
+				return;
+			}
+
+			selectionScreen.classList.remove('active');
+			learningScreen.classList.add('active');
+			scoreScreen.classList.remove('active');
+
+			score = 0;
+			wordsAttempted = 0;
+			updateProgress();
+			generateRandomWord();
+			romajiInputEl.value = ''; // Clear input from previous session
+			romajiInputEl.focus();
+			startButton.disabled = true;
+		}
+
+		function showScoreScreen() {
+			learningScreen.classList.remove('active');
+			scoreScreen.classList.add('active');
+			scoreTextEl.textContent = `You scored ${score}/${totalWordsPerRound}`;
+			continueButton.focus();
+		}
+
+		// Event Listeners
+		startButton.addEventListener('click', showLearningScreen);
+
+		romajiInputEl.addEventListener('input', () => {
+			const userAnswer = romajiInputEl.value.trim().toLowerCase();
+			clearTimeout(inputTimeout); // Clear any pending incorrect feedback timeout
+
+			if (userAnswer === currentWordRomaji) {
+				processCorrectAnswer();
+			} else if (currentWordRomaji.startsWith(userAnswer)) {
+				// Partial match, clear incorrect styling if it was there
+				hiraganaWordEl.classList.remove('incorrect');
+				feedbackEl.textContent = ''; // Clear feedback
+			} else if (userAnswer.length > 0) { // If typed something and it's not a partial or full match
+				handleIncorrectInput();
+			} else { // Input is empty
+				hiraganaWordEl.classList.remove('incorrect');
+				feedbackEl.textContent = '';
+			}
+		});
+
+		romajiInputEl.addEventListener('keypress', (event) => {
+			if (event.key === ' ') {
+				speakJapanese(currentWordHiragana);
+				event.preventDefault();
+			}
+			if (event.key === 'Enter') {
+				event.preventDefault(); // Prevent form submission if it were in a form
+				if (romajiInputEl.value.trim() === '') {
+					skipWord();
+				} else {
+					// If enter is pressed with content, check it (though 'input' usually handles it)
+					const userAnswer = romajiInputEl.value.trim().toLowerCase();
+					if (userAnswer === currentWordRomaji) {
+						processCorrectAnswer();
+					} else {
+						handleIncorrectInput(); // Show incorrect if enter is pressed on wrong full answer
+					}
+				}
+			}
+		});
+
+		continueButton.addEventListener('click', () => {
+			scoreScreen.classList.remove('active');
+			learningScreen.classList.add('active');
+			score = 0;
+			wordsAttempted = 0;
+			updateProgress();
+			generateRandomWord();
+			romajiInputEl.value = '';
+			romajiInputEl.focus();
+		});
+
+		chooseNewButton.addEventListener('click', showSelectionScreen);
+
+		checkAllColumnsCheckbox.addEventListener('change', (event) => {
+			const isChecked = event.target.checked;
+			document.querySelectorAll('#columnSelectionTable .column-checkbox').forEach(cb => {
+				cb.checked = isChecked;
+			});
+		});
+
+
+		// Initial setup
+		buildColumnSelectionTable(); // Build the table on load
+		showSelectionScreen(); // Start with the selection screen
+
+	</script>
 </body>
+
 </html>
