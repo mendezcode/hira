@@ -274,6 +274,7 @@
         let selectedCharacters = [];
         let currentWordHiragana = '';
         let currentWordRomaji = '';
+        let currentWordRomajiSplit = [];
         let score = 0;
         let wordsAttempted = 0;
         const totalWordsPerRound = 25;
@@ -374,72 +375,61 @@
             }
             romajiInputEl.disabled = false;
 
-            let wordLength = Math.floor(Math.random() * 4) + 2; // 2 to 5 characters
+            // Determine word length, but don't exceed the number of unique characters available
+            const maxPossibleLength = Math.min(selectedCharacters.length, 6); // Max of 6 or available chars
+            let wordLength = Math.floor(Math.random() * (maxPossibleLength - 2)) + 3; // 3 to maxPossibleLength chars
+            
+            // If we don't have enough unique characters for the minimum length, adjust
+            wordLength = Math.min(wordLength, selectedCharacters.length);
+            if (wordLength < 3) {
+                wordLength = Math.min(3, selectedCharacters.length);
+            }
+
             let hWord = '';
             let rWord = '';
-            let lastSelectedChar = null; // To keep track of the last character chosen
-
-            for (let i = 0; i < wordLength; i++) {
-                let currentConsiderationPool;
-
-                // Step 1: Determine the initial pool of characters for this turn,
-                // applying the 'ん' restriction if it's the first character of a word longer than 1.
-                if (i === 0 && wordLength > 1) {
-                    const filteredForN = selectedCharacters.filter(char => char.h !== 'ん');
-                    if (filteredForN.length > 0) {
-                        currentConsiderationPool = filteredForN;
-                    } else {
-                        // Fallback: if filtering 'ん' leaves no characters (e.g., only 'ん' was selected),
-                        // use all selected characters.
-                        currentConsiderationPool = [...selectedCharacters];
-                    }
-                } else {
-                    // For subsequent characters or words of length 1, all selected characters are candidates.
-                    currentConsiderationPool = [...selectedCharacters];
+            let rSplit = [];
+            
+            // Create a copy of selectedCharacters that we can modify
+            let availableCharacters = [...selectedCharacters];
+            
+            // Filter out 'ん' if it's the first character of a multi-character word
+            if (wordLength > 1) {
+                availableCharacters = availableCharacters.filter(char => char.h !== 'ん');
+                // If this filtering leaves us with no characters, fall back to original set
+                if (availableCharacters.length === 0) {
+                    availableCharacters = [...selectedCharacters];
                 }
+            }
 
-                let finalSelectionPool = currentConsiderationPool;
-
-                // Step 2: If a character was previously selected, try to filter it out from the current pool.
-                if (lastSelectedChar) {
-                    const withoutRepetition = currentConsiderationPool.filter(char =>
-                        // Compare characters based on their hiragana and romaji representations.
-                        // Adjust if your character objects have a unique ID you'd rather use.
-                        !(char.h === lastSelectedChar.h && char.r === lastSelectedChar.r)
-                    );
-
-                    if (withoutRepetition.length > 0) {
-                        // If filtering out the last character leaves a non-empty pool, use it.
-                        finalSelectionPool = withoutRepetition;
-                    }
-                    // If withoutRepetition is empty, it means all characters in currentConsiderationPool
-                    // are the same as lastSelectedChar. In this case, finalSelectionPool remains
-                    // currentConsiderationPool, and a repetition is unavoidable and allowed.
-                }
-
-                // At this point, finalSelectionPool contains the characters to choose from.
-                // It should not be empty if selectedCharacters was not empty at the start.
-                if (finalSelectionPool.length === 0) {
-                    // This is an unlikely fallback, e.g. if selectedCharacters was empty
-                    // (though guarded above) or some other unexpected state.
-                    // Default to the full selectedCharacters list to ensure a character is picked.
-                    finalSelectionPool = [...selectedCharacters];
-                    // If even selectedCharacters is empty, this would error; however,
-                    // the initial check `selectedCharacters.length === 0` prevents this.
-                }
-                
-                const randomChar = finalSelectionPool[Math.floor(Math.random() * finalSelectionPool.length)];
-
-                hWord += randomChar.h;
-                rWord += randomChar.r;
-                lastSelectedChar = randomChar; // Remember the character just selected
+            // Shuffle the available characters to ensure randomness
+            availableCharacters = shuffleArray(availableCharacters);
+            
+            // Take the first 'wordLength' characters from the shuffled array
+            const selectedChars = availableCharacters.slice(0, wordLength);
+            
+            // Build the word from the selected unique characters
+            for (const char of selectedChars) {
+                hWord += char.h;
+                rWord += char.r;
+                rSplit.push(char.r.toLowerCase());
             }
 
             currentWordHiragana = hWord;
-            currentWordRomaji = rWord.toLowerCase(); // Ensure romaji is lowercase for comparison
+            currentWordRomaji = rWord.toLowerCase();
+            currentWordRomajiSplit = [...rSplit];
             hiraganaWordEl.textContent = currentWordHiragana;
-            hiraganaWordEl.classList.remove('incorrect'); // Assuming this class is for styling
+            hiraganaWordEl.classList.remove('incorrect');
             feedbackEl.textContent = '';
+        }
+
+        // Helper function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
         }
 
         function processCorrectAnswer() {
@@ -478,22 +468,31 @@
             }, 1500);
         }
 
-        function skipWord() {
-            wordsAttempted++;
-            feedbackEl.textContent = `Skipped! Was: ${currentWordRomaji}`;
-            feedbackEl.style.color = '#f39c12'; // Orange for skipped
-            romajiInputEl.value = '';
-            hiraganaWordEl.classList.remove('incorrect');
-
-            setTimeout(() => {
+        function handleSkipped(e) {
+            if ('Enter' === e.key) {
                 if (wordsAttempted >= totalWordsPerRound) {
                     showScoreScreen();
                 } else {
                     updateProgress();
                     generateRandomWord();
                 }
-                 feedbackEl.textContent = '';
-            }, 800); // Longer delay for skipped to read the answer
+                document.body.removeEventListener('keypress', handleSkipped);
+                feedbackEl.textContent = '';
+                romajiInput.disabled = false;
+                romajiInput.focus();
+            }
+        }
+
+        function skipWord() {
+            wordsAttempted++;
+            feedbackEl.textContent = `Skipped! Was: ${currentWordRomajiSplit.join(' · ')}`;
+            feedbackEl.style.color = '#f39c12'; // Orange for skipped
+            romajiInputEl.value = '';
+            hiraganaWordEl.classList.remove('incorrect');
+            romajiInput.disabled = true;
+            setTimeout(() => {
+                document.body.addEventListener('keypress', handleSkipped);
+            }, 0 );
         }
 
 
