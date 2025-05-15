@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiragana Learner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1, h2 {
+            color: #444;
+        }
+
+        #selectionScreen, #learningScreen, #scoreScreen {
+            display: none; /* Hidden by default */
+        }
+
+        #selectionScreen.active, #learningScreen.active, #scoreScreen.active {
+            display: block;
+        }
+
+        .column-options label {
+            display: block;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .column-options input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #hiraganaWord {
+            font-size: 4.5em; /* Increased font size for Hiragana word */
+            color: #333;
+            margin: 20px 0;
+            min-height: 80px; /* Ensure space even if word is short */
+            letter-spacing: 2px;
+        }
+
+        #hiraganaWord.incorrect {
+            color: red;
+        }
+
+        #romajiInput {
+            padding: 10px;
+            font-size: 1.2em;
+            width: 80%;
+            max-width: 300px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        #feedback {
+            min-height: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        #progressText {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .score-summary {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="selectionScreen" class="active">
+            <h1>Learn Hiragana</h1>
+            <h2>Choose Columns to Practice</h2>
+            <div class="column-options">
+                <label><input type="checkbox" value="a" checked> A-column (あ, い, う, え, お)</label>
+                <label><input type="checkbox" value="k"> K-column (か, き, く, け, こ)</label>
+                <label><input type="checkbox" value="s"> S-column (さ, し, す, せ, そ)</label>
+                <label><input type="checkbox" value="t"> T-column (た, ち, つ, て, と)</label>
+                <label><input type="checkbox" value="n"> N-column (な, に, ぬ, ね, の)</label>
+                <label><input type="checkbox" value="h"> H-column (は, ひ, ふ, へ, ほ)</label>
+                <label><input type="checkbox" value="m"> M-column (ま, み, む, め, も)</label>
+                <label><input type="checkbox" value="y"> Y-column (や, ゆ, よ)</label>
+                <label><input type="checkbox" value="r"> R-column (ら, り, る, れ, ろ)</label>
+                <label><input type="checkbox" value="w"> W-column (わ, を)</label>
+                <label><input type="checkbox" value="g"> G-column (が, ぎ, ぐ, げ, ご)</label>
+                <label><input type="checkbox" value="z"> Z-column (ざ, じ, ず, ぜ, ぞ)</label>
+                <label><input type="checkbox" value="d"> D-column (だ, ぢ, づ, で, ど)</label>
+                <label><input type="checkbox" value="b"> B-column (ば, び, ぶ, べ, ぼ)</label>
+                <label><input type="checkbox" value="p"> P-column (ぱ, ぴ, ぷ, ぺ, ぽ)</label>
+                <label><input type="checkbox" value="ky"> Kya, Kyu, Kyo (きゃ, きゅ, きょ)</label>
+                <label><input type="checkbox" value="sh"> Sha, Shu, Sho (しゃ, しゅ, しょ)</label>
+                <label><input type="checkbox" value="ch"> Cha, Chu, Cho (ちゃ, ちゅ, ちょ)</label>
+                <label><input type="checkbox" value="ny"> Nya, Nyu, Nyo (にゃ, にゅ, にょ)</label>
+                <label><input type="checkbox" value="hy"> Hya, Hyu, Hyo (ひゃ, ひゅ, ひょ)</label>
+                <label><input type="checkbox" value="my"> Mya, Myu, Myo (みゃ, みゅ, みょ)</label>
+                <label><input type="checkbox" value="ry"> Rya, Ryu, Ryo (りゃ, りゅ, りょ)</label>
+                <label><input type="checkbox" value="gy"> Gya, Gyu, Gyo (ぎゃ, ぎゅ, ぎょ)</label>
+                <label><input type="checkbox" value="j"> Ja, Ju, Jo (じゃ, じゅ, じょ - from shi+dakuten)</label>
+                <label><input type="checkbox" value="by"> Bya, Byu, Byo (びゃ, びゅ, びょ)</label>
+                <label><input type="checkbox" value="py"> Pya, Pyu, Pyo (ぴゃ, ぴゅ, ぴょ)</label>
+                 <label><input type="checkbox" value="n_solo"> ん (n)</label>
+            </div>
+            <button id="startButton">Start Learning</button>
+        </div>
+
+        <div id="learningScreen">
+            <h2>Translate the Hiragana</h2>
+            <div id="hiraganaWord"></div>
+            <input type="text" id="romajiInput" placeholder="Type romaji here">
+            <div id="feedback"></div>
+            <div id="progressText">Word 1 of 25</div>
+            <button id="skipButton">Skip Word</button>
+        </div>
+
+        <div id="scoreScreen">
+            <h2>Quiz Finished!</h2>
+            <div class="score-summary" id="scoreText"></div>
+            <button id="continueButton">Continue (Same Columns)</button>
+            <button id="chooseNewButton">Choose New Columns</button>
+        </div>
+    </div>
+
+    <script>
+        const hiraganaChars = {
+            'a': [{ h: 'あ', r: 'a' }, { h: 'い', r: 'i' }, { h: 'う', r: 'u' }, { h: 'え', r: 'e' }, { h: 'お', r: 'o' }],
+            'k': [{ h: 'か', r: 'ka' }, { h: 'き', r: 'ki' }, { h: 'く', r: 'ku' }, { h: 'け', r: 'ke' }, { h: 'こ', r: 'ko' }],
+            's': [{ h: 'さ', r: 'sa' }, { h: 'し', r: 'shi' }, { h: 'す', r: 'su' }, { h: 'せ', r: 'se' }, { h: 'そ', r: 'so' }],
+            't': [{ h: 'た', r: 'ta' }, { h: 'ち', r: 'chi' }, { h: 'つ', r: 'tsu' }, { h: 'て', r: 'te' }, { h: 'と', r: 'to' }],
+            'n': [{ h: 'な', r: 'na' }, { h: 'に', r: 'ni' }, { h: 'ぬ', r: 'nu' }, { h: 'ね', r: 'ne' }, { h: 'の', r: 'no' }],
+            'h': [{ h: 'は', r: 'ha' }, { h: 'ひ', r: 'hi' }, { h: 'ふ', r: 'fu' }, { h: 'へ', r: 'he' }, { h: 'ほ', r: 'ho' }],
+            'm': [{ h: 'ま', r: 'ma' }, { h: 'み', r: 'mi' }, { h: 'む', r: 'mu' }, { h: 'め', r: 'me' }, { h: 'も', r: 'mo' }],
+            'y': [{ h: 'や', r: 'ya' }, { h: 'ゆ', r: 'yu' }, { h: 'よ', r: 'yo' }],
+            'r': [{ h: 'ら', r: 'ra' }, { h: 'り', r: 'ri' }, { h: 'る', r: 'ru' }, { h: 'れ', r: 're' }, { h: 'ろ', r: 'ro' }],
+            'w': [{ h: 'わ', r: 'wa' }, { h: 'を', r: 'wo' }],
+            'g': [{ h: 'が', r: 'ga' }, { h: 'ぎ', r: 'gi' }, { h: 'ぐ', r: 'gu' }, { h: 'げ', r: 'ge' }, { h: 'ご', r: 'go' }],
+            'z': [{ h: 'ざ', r: 'za' }, { h: 'じ', r: 'ji' }, { h: 'ず', r: 'zu' }, { h: 'ぜ', r: 'ze' }, { h: 'ぞ', r: 'zo' }],
+            'd': [{ h: 'だ', r: 'da' }, { h: 'ぢ', r: 'ji' }, { h: 'づ', r: 'zu' }, { h: 'で', r: 'de' }, { h: 'ど', r: 'do' }],
+            'b': [{ h: 'ば', r: 'ba' }, { h: 'び', r: 'bi' }, { h: 'ぶ', r: 'bu' }, { h: 'べ', r: 'be' }, { h: 'ぼ', r: 'bo' }],
+            'p': [{ h: 'ぱ', r: 'pa' }, { h: 'ぴ', r: 'pi' }, { h: 'ぷ', r: 'pu' }, { h: 'ぺ', r: 'pe' }, { h: 'ぽ', r: 'po' }],
+            'ky': [{ h: 'きゃ', r: 'kya' }, { h: 'きゅ', r: 'kyu' }, { h: 'きょ', r: 'kyo' }],
+            'sh': [{ h: 'しゃ', r: 'sha' }, { h: 'しゅ', r: 'shu' }, { h: 'しょ', r: 'sho' }],
+            'ch': [{ h: 'ちゃ', r: 'cha' }, { h: 'ちゅ', r: 'chu' }, { h: 'ちょ', r: 'cho' }],
+            'ny': [{ h: 'にゃ', r: 'nya' }, { h: 'にゅ', r: 'nyu' }, { h: 'にょ', r: 'nyo' }],
+            'hy': [{ h: 'ひゃ', r: 'hya' }, { h: 'ひゅ', r: 'hyu' }, { h: 'ひょ', r: 'hyo' }],
+            'my': [{ h: 'みゃ', r: 'mya' }, { h: 'みゅ', r: 'myu' }, { h: 'みょ', r: 'myo' }],
+            'ry': [{ h: 'りゃ', r: 'rya' }, { h: 'りゅ', r: 'ryu' }, { h: 'りょ', r: 'ryo' }],
+            'gy': [{ h: 'ぎゃ', r: 'gya' }, { h: 'ぎゅ', r: 'gyu' }, { h: 'ぎょ', r: 'gyo' }],
+            'j': [{ h: 'じゃ', r: 'ja' }, { h: 'じゅ', r: 'ju' }, { h: 'じょ', r: 'jo' }], // from じ (ji)
+            'by': [{ h: 'びゃ', r: 'bya' }, { h: 'びゅ', r: 'byu' }, { h: 'びょ', r: 'byo' }],
+            'py': [{ h: 'ぴゃ', r: 'pya' }, { h: 'ぴゅ', r: 'pyu' }, { h: 'ぴょ', r: 'pyo' }],
+            'n_solo': [{h: 'ん', r: 'n'}]
+        };
+
+        const selectionScreen = document.getElementById('selectionScreen');
+        const learningScreen = document.getElementById('learningScreen');
+        const scoreScreen = document.getElementById('scoreScreen');
+
+        const startButton = document.getElementById('startButton');
+        const hiraganaWordEl = document.getElementById('hiraganaWord');
+        const romajiInputEl = document.getElementById('romajiInput');
+        const feedbackEl = document.getElementById('feedback');
+        const progressTextEl = document.getElementById('progressText');
+        const skipButton = document.getElementById('skipButton');
+
+        const scoreTextEl = document.getElementById('scoreText');
+        const continueButton = document.getElementById('continueButton');
+        const chooseNewButton = document.getElementById('chooseNewButton');
+
+        let selectedCharacters = [];
+        let currentWordHiragana = '';
+        let currentWordRomaji = '';
+        let score = 0;
+        let wordsAttempted = 0;
+        const totalWordsPerRound = 25;
+        let currentWordSkipped = false;
+
+        function getSelectedColumns() {
+            const checkboxes = document.querySelectorAll('.column-options input[type="checkbox"]:checked');
+            const columns = [];
+            checkboxes.forEach(cb => columns.push(cb.value));
+            return columns;
+        }
+
+        function populateSelectedCharacters(columns) {
+            selectedCharacters = [];
+            columns.forEach(colKey => {
+                if (hiraganaChars[colKey]) {
+                    selectedCharacters.push(...hiraganaChars[colKey]);
+                }
+            });
+        }
+
+        function generateRandomWord() {
+            if (selectedCharacters.length === 0) {
+                hiraganaWordEl.textContent = 'Error!';
+                feedbackEl.textContent = 'Please select at least one column.';
+                romajiInputEl.disabled = true;
+                return;
+            }
+            romajiInputEl.disabled = false;
+
+            let wordLength = Math.floor(Math.random() * 4) + 2; // 2 to 5 characters
+            let hWord = '';
+            let rWord = '';
+
+            for (let i = 0; i < wordLength; i++) {
+                // Avoid 'ん' (n_solo) at the beginning of a word if wordLength > 1
+                let randomChar;
+                if (i === 0 && wordLength > 1) {
+                    const charsWithoutN = selectedCharacters.filter(char => char.h !== 'ん');
+                    if (charsWithoutN.length > 0) {
+                        randomChar = charsWithoutN[Math.floor(Math.random() * charsWithoutN.length)];
+                    } else { // Only 'ん' selected, allow it.
+                        randomChar = selectedCharacters[Math.floor(Math.random() * selectedCharacters.length)];
+                    }
+                } else {
+                     randomChar = selectedCharacters[Math.floor(Math.random() * selectedCharacters.length)];
+                }
+
+                // Prevent 'んん' if 'ん' is the only character selected and word length > 1
+                if (hWord.endsWith('ん') && randomChar.h === 'ん' && selectedCharacters.length === 1 && selectedCharacters[0].h === 'ん') {
+                    // if 'ん' is the only option, and it's already the last char, we might end the word early
+                    if (hWord.length >= 2) break; // ensure at least 2 chars if possible
+                    // if not, we accept 'んん' if that's the only choice.
+                }
+
+
+                hWord += randomChar.h;
+                rWord += randomChar.r;
+            }
+            currentWordHiragana = hWord;
+            currentWordRomaji = rWord;
+            hiraganaWordEl.textContent = currentWordHiragana;
+            hiraganaWordEl.classList.remove('incorrect');
+            feedbackEl.textContent = '';
+            currentWordSkipped = false;
+        }
+
+        function checkAnswer() {
+            const userAnswer = romajiInputEl.value.trim().toLowerCase();
+            if (userAnswer === currentWordRomaji) {
+                if (!currentWordSkipped) {
+                    score++;
+                }
+                wordsAttempted++;
+                feedbackEl.textContent = 'Correct!';
+                feedbackEl.style.color = 'green';
+                romajiInputEl.value = '';
+                if (wordsAttempted >= totalWordsPerRound) {
+                    showScoreScreen();
+                } else {
+                    updateProgress();
+                    generateRandomWord();
+                }
+            } else {
+                hiraganaWordEl.classList.add('incorrect');
+                feedbackEl.textContent = 'Try again or skip.';
+                feedbackEl.style.color = 'red';
+            }
+        }
+
+        function skipWord() {
+            wordsAttempted++;
+            currentWordSkipped = true; // Mark as skipped so it doesn't count towards score if then answered correctly by mistake
+            feedbackEl.textContent = `Skipped. The answer was: ${currentWordRomaji}`;
+            feedbackEl.style.color = 'orange';
+            romajiInputEl.value = '';
+             if (wordsAttempted >= totalWordsPerRound) {
+                showScoreScreen();
+            } else {
+                updateProgress();
+                generateRandomWord();
+            }
+        }
+
+
+        function updateProgress() {
+            progressTextEl.textContent = `Word ${wordsAttempted + 1} of ${totalWordsPerRound}`;
+        }
+
+        function showSelectionScreen() {
+            selectionScreen.classList.add('active');
+            learningScreen.classList.remove('active');
+            scoreScreen.classList.remove('active');
+            startButton.disabled = false; // Re-enable start button
+             // Uncheck all boxes for a fresh start if desired, or leave them checked
+            // document.querySelectorAll('.column-options input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        function showLearningScreen() {
+            const selectedCols = getSelectedColumns();
+            if (selectedCols.length === 0) {
+                alert("Please select at least one Hiragana column to practice.");
+                return;
+            }
+            populateSelectedCharacters(selectedCols);
+            if (selectedCharacters.length === 0) {
+                 alert("No characters available for the selected columns. This shouldn't happen if columns have characters.");
+                return;
+            }
+
+            selectionScreen.classList.remove('active');
+            learningScreen.classList.add('active');
+            scoreScreen.classList.remove('active');
+
+            score = 0;
+            wordsAttempted = 0;
+            updateProgress();
+            generateRandomWord();
+            romajiInputEl.focus();
+            startButton.disabled = true; // Disable start button while quiz is in progress
+        }
+
+        function showScoreScreen() {
+            learningScreen.classList.remove('active');
+            scoreScreen.classList.add('active');
+            scoreTextEl.textContent = `You scored ${score}/${totalWordsPerRound}!`;
+        }
+
+        // Event Listeners
+        startButton.addEventListener('click', showLearningScreen);
+
+        romajiInputEl.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+         romajiInputEl.addEventListener('input', () => {
+            // Optional: Clear "incorrect" styling when user starts typing again
+             if (hiraganaWordEl.classList.contains('incorrect')) {
+                hiraganaWordEl.classList.remove('incorrect');
+                feedbackEl.textContent = '';
+            }
+        });
+
+
+        skipButton.addEventListener('click', skipWord);
+
+        continueButton.addEventListener('click', () => {
+            // Keep current selectedCharacters, restart learning screen
+            scoreScreen.classList.remove('active');
+            learningScreen.classList.add('active');
+            score = 0;
+            wordsAttempted = 0;
+            updateProgress();
+            generateRandomWord();
+            romajiInputEl.focus();
+        });
+
+        chooseNewButton.addEventListener('click', showSelectionScreen);
+
+        // Initial setup
+        showSelectionScreen(); // Start with the selection screen
+
+    </script>
+</body>
+</html>
