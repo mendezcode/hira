@@ -37,6 +37,9 @@
         h1 { margin-bottom: 15px; margin-top: 0; }
         h2 { margin-bottom: 25px; font-size: 1.8em; }
 
+        #scoreScreen {
+            padding: 2em 0 1.75em;
+        }
 
         #selectionScreen, #learningScreen, #scoreScreen {
             display: none; /* Hidden by default */
@@ -222,7 +225,7 @@
             </div>
 
         <div id="scoreScreen">
-            <h2>Quiz Finished!</h2>
+            <h2 style="margin-top: 0;">Quiz Finished!</h2>
             <div class="score-summary" id="scoreText"></div>
             <button id="continueButton">Continue (Same Columns)</button>
             <button id="chooseNewButton">Choose New Columns</button>
@@ -273,7 +276,7 @@
         let currentWordRomaji = '';
         let score = 0;
         let wordsAttempted = 0;
-        const totalWordsPerRound = 25;
+        const totalWordsPerRound = 2;
         let inputTimeout = null; // For handling incorrect input feedback
 
         function buildColumnSelectionTable() {
@@ -533,7 +536,7 @@
         function showScoreScreen() {
             learningScreen.classList.remove('active');
             scoreScreen.classList.add('active');
-            scoreTextEl.textContent = `You scored ${score}/${totalWordsPerRound}!`;
+            scoreTextEl.textContent = `You scored ${score}/${totalWordsPerRound}`;
         }
 
         // Event Listeners
